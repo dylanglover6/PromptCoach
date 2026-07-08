@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+api/local.settings.json
+.env
+.env.*
+.vscode/*
+!.vscode/extensions.json
+.claude/settings.local.json

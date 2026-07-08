@@ -1,0 +1,11 @@
+{
+  "name": "promptcoach",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "swa start http://localhost:5173 --api-location api --run \"npm run dev --prefix frontend\""
+  },
+  "devDependencies": {
+    "@azure/static-web-apps-cli": "^2.0.6"
+  }
+}
