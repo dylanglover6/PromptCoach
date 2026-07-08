@@ -37,6 +37,7 @@ app.http("rate", {
       response = await client.messages.create({
         model: MODEL,
         max_tokens: 2048,
+        temperature: 0,
         system: RUBRIC_SYSTEM_PROMPT,
         tools: [tool],
         tool_choice: { type: "tool", name: tool.name },

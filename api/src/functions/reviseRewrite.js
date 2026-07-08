@@ -32,6 +32,7 @@ app.http("reviseRewrite", {
       response = await client.messages.create({
         model: MODEL,
         max_tokens: 2048,
+        temperature: 0,
         system: REVISE_SYSTEM_PROMPT,
         tools: [reviseTool],
         tool_choice: { type: "tool", name: reviseTool.name },
