@@ -1,0 +1,28 @@
+.tabs-strip {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  gap: 4px;
+}
+
+.tabs-tab {
+  font: inherit;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text);
+  padding: 8px 12px;
+  margin-bottom: -1px;
+}
+
+.tabs-tab.active {
+  color: var(--text-h);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .tabs-tab.hide-on-mobile {
+    display: none;
+  }
+}

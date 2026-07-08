@@ -1,13 +1,8 @@
 import { useState } from "react";
 import "./RatePrompt.css";
-
-const DIMENSION_LABELS = {
-  clarity: "Clarity",
-  context: "Context",
-  examples: "Examples",
-  structure: "Structure",
-  success_criteria: "Success criteria",
-};
+import InfoButton from "./InfoButton";
+import DimensionsPanel from "./DimensionsPanel";
+import RewritePanel from "./RewritePanel";
 
 async function callRate(body) {
   const res = await fetch("/api/rate", {
@@ -83,7 +78,10 @@ export default function RatePrompt() {
 
   return (
     <section className="rate-prompt">
-      <h1>Rate my prompt</h1>
+      <h1>
+        Rate my prompt
+        <InfoButton />
+      </h1>
 
       {(phase === "idle" || phase === "loading" || phase === "error") && (
         <form className="rate-form" onSubmit={submitInitial}>
@@ -139,21 +137,8 @@ export default function RatePrompt() {
             <span className="rate-score">{result.rating.overall}/10</span>
             <span className="rate-verdict">{result.rating.verdict}</span>
           </div>
-          <div className="rate-dimensions">
-            {Object.entries(result.rating.dimensions).map(([key, dim]) => (
-              <div className="rate-dimension" key={key}>
-                <div className="rate-dimension-header">
-                  <strong>{DIMENSION_LABELS[key] || key}</strong>
-                  <span>{dim.score}/10</span>
-                </div>
-                <p>{dim.note}</p>
-              </div>
-            ))}
-          </div>
-          <div className="rate-rewrite">
-            <h2>Rewritten prompt</h2>
-            <pre>{result.rewritten_prompt}</pre>
-          </div>
+          <DimensionsPanel dimensions={result.rating.dimensions} />
+          <RewritePanel originalPrompt={promptText} rewrittenPrompt={result.rewritten_prompt} />
           <button onClick={reset}>Rate another prompt</button>
         </div>
       )}

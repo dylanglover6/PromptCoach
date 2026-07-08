@@ -1,0 +1,97 @@
+.rewrite-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rewrite-panel-header h2 {
+  margin: 0;
+}
+
+.copy-button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  padding: 6px 12px;
+}
+
+.rewrite-side-by-side {
+  display: flex;
+  gap: 16px;
+}
+
+.rewrite-side-by-side > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.rewrite-side-by-side h3 {
+  font-size: 15px;
+  margin: 0 0 6px;
+  color: var(--text-h);
+}
+
+.rewrite-panel pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: var(--mono);
+  font-size: 15px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.feedback-toggle {
+  font: inherit;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 4px 0;
+  text-align: left;
+  text-decoration: underline;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feedback-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  color: var(--text-h);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.feedback-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.feedback-form-actions button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  padding: 8px 14px;
+}
+
+.feedback-form-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

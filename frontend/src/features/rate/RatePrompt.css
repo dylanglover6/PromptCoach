@@ -98,16 +98,18 @@
   color: var(--text-h);
 }
 
-.rate-dimensions {
+.dimensions-panel,
+.rewrite-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.rate-dimension {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px 14px;
+.dimensions-content {
+  padding-top: 4px;
 }
 
 .rate-dimension-header {
@@ -117,18 +119,6 @@
   margin-bottom: 4px;
 }
 
-.rate-dimension p {
+.dimensions-content p {
   margin: 0;
-}
-
-.rate-rewrite pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-family: var(--mono);
-  font-size: 15px;
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 14px;
-  color: var(--text-h);
 }
