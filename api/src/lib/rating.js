@@ -13,13 +13,26 @@ const DIMENSION_WEIGHTS = {
 };
 
 const SCORE_FLOOR = 3; // per-dimension floor, out of 10 — unchanged from v2
-const GOAL_CLARITY_GATE_THRESHOLD = 4; // if goal_clarity <= this, cap overall
+
+// A prompt with zero line breaks and at least this many words is treated as
+// a mechanical "wall of text" — enforced in code, not left to the model's
+// judgment. This dimension has now shown twice (v2's "genuinely a wall of
+// text" wording, and the original raw line-break perception bug before that)
+// that soft/judgment-based instructions don't reliably override a model's
+// tendency to credit good content for good formatting. Below this word
+// count, a single unbroken sentence is normal and doesn't need structure.
+const WALL_OF_TEXT_WORD_THRESHOLD = 40;
+// Matches the "5 or below = real flaw" boundary used everywhere else in the
+// rubric (see the general anchoring rule below), and specifically the
+// goal_clarity clarification-cap, which lands exactly at 5 — the gate must
+// catch that case, not sit one point above it.
+const GOAL_CLARITY_GATE_THRESHOLD = 5; // if goal_clarity <= this, cap overall
 const GOAL_CLARITY_GATE_CAP = 50; // ...at this value (out of 100)
 
 // Bump whenever RUBRIC_SYSTEM_PROMPT's scoring logic changes materially — a
 // rubric change is a measurement change, and past ratings are only
 // comparable to new ones if you know which rubric version produced each.
-const RUBRIC_VERSION = "2026-07-v3";
+const RUBRIC_VERSION = "2026-07-v3.1";
 
 const RUBRIC_SYSTEM_PROMPT = `You are PromptCoach, an expert at evaluating and improving prompts written for AI models.
 
@@ -224,6 +237,31 @@ function computeOverallScore(dimensions) {
   return overall;
 }
 
+// Overrides modifiers.structure for the two cases that are fully mechanical
+// (zero line breaks) and have proven unreliable to leave as a model
+// judgment across two prior rubric versions. Both applicability AND note
+// are replaced together — overriding only the label while leaving the
+// model's original note in place would reintroduce the exact score/note
+// mismatch problem found earlier (e.g. a note praising "logical
+// organization" sitting next to a label that says needs_improvement).
+// Prompts with at least one line break are left entirely to the model's
+// own judgment (well_organized vs. adequate) — that distinction hasn't
+// shown the same instability, so there's no reason to take it out of the
+// model's hands too.
+function enforceStructureModifier(modifiers, structuralFacts) {
+  const { lineBreakCount, wordCount } = structuralFacts;
+
+  if (lineBreakCount === 0 && wordCount >= WALL_OF_TEXT_WORD_THRESHOLD) {
+    modifiers.structure.applicability = "needs_improvement";
+    modifiers.structure.note = `This prompt is ${wordCount} words with zero line breaks, headings, or lists — a single unbroken block of text. Regardless of how clearly it reads, this lacks the visual separation needed to scan a prompt of this length quickly.`;
+  } else if (lineBreakCount === 0 && wordCount < WALL_OF_TEXT_WORD_THRESHOLD) {
+    modifiers.structure.applicability = "not_applicable";
+    modifiers.structure.note = `This prompt is short (${wordCount} words) and doesn't need line breaks or headings to be scannable.`;
+  }
+
+  return modifiers;
+}
+
 module.exports = {
   DIMENSION_KEYS,
   DIMENSION_WEIGHTS,
@@ -232,6 +270,7 @@ module.exports = {
   buildRateTool,
   computeStructuralFacts,
   computeOverallScore,
+  enforceStructureModifier,
   REVISE_SYSTEM_PROMPT,
   reviseTool,
 };

@@ -1,6 +1,6 @@
 const { app } = require("@azure/functions");
 const Anthropic = require("@anthropic-ai/sdk");
-const { RUBRIC_VERSION, RUBRIC_SYSTEM_PROMPT, buildRateTool, computeStructuralFacts, computeOverallScore } = require("../lib/rating");
+const { RUBRIC_VERSION, RUBRIC_SYSTEM_PROMPT, buildRateTool, computeStructuralFacts, computeOverallScore, enforceStructureModifier } = require("../lib/rating");
 
 const MODEL = process.env.RATER_MODEL || "claude-haiku-4-5";
 
@@ -55,6 +55,7 @@ app.http("rate", {
 
     const result = toolUse.input;
     if (result.action === "provide_rating") {
+      result.rating.modifiers = enforceStructureModifier(result.rating.modifiers, structuralFacts);
       result.rating.overall = computeOverallScore(result.rating.dimensions);
     }
     result.rubricVersion = RUBRIC_VERSION;
