@@ -18,8 +18,9 @@ export default function InfoButton() {
       {open && (
         <div className="info-popover" role="dialog">
           <p>
-            A good prompt is clear, gives enough context, includes examples where
-            helpful, is well-structured, and states what success looks like —{" "}
+            A good prompt is clear about the goal, gives the necessary context, defines
+            rules for edge cases, specifies the output format, and states what success
+            looks like — with structure and examples as a bonus when they help —{" "}
             <Link to="/learn" onClick={() => setOpen(false)}>
               Learn more
             </Link>{" "}

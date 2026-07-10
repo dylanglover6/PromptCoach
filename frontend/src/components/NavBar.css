@@ -1,0 +1,19 @@
+.nav-bar {
+  display: flex;
+  gap: 20px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.nav-bar a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-bar a.active {
+  color: var(--text-h);
+  text-decoration: underline;
+}
