@@ -1,0 +1,37 @@
+.modifiers-panel {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modifier-badge {
+  flex: 1;
+  min-width: 200px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--border);
+}
+
+.modifier-badge-header {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-h);
+  margin-bottom: 4px;
+}
+
+.modifier-badge p {
+  margin: 0;
+}
+
+.modifier-badge.tone-positive {
+  border-left-color: #2f9e44;
+}
+
+.modifier-badge.tone-attention {
+  border-left-color: #e5484d;
+}
+
+.modifier-badge.tone-muted {
+  opacity: 0.75;
+}

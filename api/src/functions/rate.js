@@ -1,6 +1,6 @@
 const { app } = require("@azure/functions");
 const Anthropic = require("@anthropic-ai/sdk");
-const { RUBRIC_SYSTEM_PROMPT, buildRateTool, enforceScoreFloor } = require("../lib/rating");
+const { RUBRIC_VERSION, RUBRIC_SYSTEM_PROMPT, buildRateTool, computeStructuralFacts, computeOverallScore } = require("../lib/rating");
 
 const MODEL = process.env.RATER_MODEL || "claude-haiku-4-5";
 
@@ -24,7 +24,8 @@ app.http("rate", {
     const clarification = body?.clarification;
     const round = clarification ? 2 : 1;
 
-    let userContent = `Prompt to evaluate:\n"""\n${prompt}\n"""`;
+    const structuralFacts = computeStructuralFacts(prompt);
+    let userContent = `Prompt to evaluate:\n"""\n${prompt}\n"""\n\nStructural facts (computed, not your judgment — use these exactly, do not re-derive them by reading the text): line breaks = ${structuralFacts.lineBreakCount}, headings present = ${structuralFacts.hasHeadings}, bullet list present = ${structuralFacts.hasBulletList}, numbered list present = ${structuralFacts.hasNumberedList}, word count = ${structuralFacts.wordCount}.`;
     if (round === 2) {
       userContent += `\n\nA clarifying question was already asked: "${clarification.question}"\nThe user answered: "${clarification.answer}"\n\nThis is the final round. You must choose provide_rating or insufficient_context now.`;
     }
@@ -54,8 +55,9 @@ app.http("rate", {
 
     const result = toolUse.input;
     if (result.action === "provide_rating") {
-      result.rating = enforceScoreFloor(result.rating);
+      result.rating.overall = computeOverallScore(result.rating.dimensions);
     }
+    result.rubricVersion = RUBRIC_VERSION;
 
     return { jsonBody: result };
   },

@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./RatePrompt.css";
 import InfoButton from "./InfoButton";
 import DimensionsPanel from "./DimensionsPanel";
+import ModifiersPanel from "./ModifiersPanel";
 import RewritePanel from "./RewritePanel";
 
 async function callRate(body) {
@@ -134,10 +135,11 @@ export default function RatePrompt() {
       {phase === "rating" && result && (
         <div className="rate-result">
           <div className="rate-overall">
-            <span className="rate-score">{result.rating.overall}/10</span>
+            <span className="rate-score">{result.rating.overall}/100</span>
             <span className="rate-verdict">{result.rating.verdict}</span>
           </div>
           <DimensionsPanel dimensions={result.rating.dimensions} />
+          <ModifiersPanel modifiers={result.rating.modifiers} />
           <RewritePanel originalPrompt={promptText} rewrittenPrompt={result.rewritten_prompt} />
           <button onClick={reset}>Rate another prompt</button>
         </div>

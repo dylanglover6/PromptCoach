@@ -154,3 +154,8 @@ calibration round (unchanged) and confirm:
 - Run Test 1 (or any single prompt) 3 times in a row with temperature
   0 set, and confirm the spread across runs is now much tighter than
   the 4-point swing seen before
+
+
+## Addendum
+Context and Success Criteria measure different things. Context owns whether the prompt supplies the information or decision rules needed to handle the input, including ambiguous or edge-case instances — check the SPECIFIC input given, not just whether the task category is generally simple. Success Criteria owns whether the output format/shape is specified. A well-specified format must not cause Success Criteria to implicitly cover for a missing decision rule elsewhere.
+

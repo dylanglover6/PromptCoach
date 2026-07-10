@@ -98,7 +98,6 @@
   color: var(--text-h);
 }
 
-.dimensions-panel,
 .rewrite-panel {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -108,8 +107,32 @@
   gap: 12px;
 }
 
+.dimensions-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.dimensions-panel summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.dimensions-panel[open] summary {
+  margin-bottom: 12px;
+}
+
 .dimensions-content {
-  padding-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rate-dimension {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
 }
 
 .rate-dimension-header {
@@ -119,6 +142,6 @@
   margin-bottom: 4px;
 }
 
-.dimensions-content p {
+.rate-dimension p {
   margin: 0;
 }

@@ -1,30 +1,26 @@
-import { useState } from "react";
-import Tabs from "../../components/Tabs";
-
 const DIMENSION_LABELS = {
-  clarity: "Clarity",
-  context: "Context",
-  examples: "Examples",
-  structure: "Structure",
+  goal_clarity: "Goal clarity",
+  relevant_context: "Relevant context",
+  constraints: "Constraints",
+  output_specification: "Output specification",
   success_criteria: "Success criteria",
 };
 
 export default function DimensionsPanel({ dimensions }) {
-  const keys = Object.keys(dimensions);
-  const [activeId, setActiveId] = useState(keys[0]);
-  const tabs = keys.map((key) => ({ id: key, label: DIMENSION_LABELS[key] || key }));
-  const active = dimensions[activeId];
-
   return (
-    <div className="dimensions-panel">
-      <Tabs tabs={tabs} activeId={activeId} onChange={setActiveId} />
+    <details className="dimensions-panel">
+      <summary>Rating details</summary>
       <div className="dimensions-content">
-        <div className="rate-dimension-header">
-          <strong>{DIMENSION_LABELS[activeId] || activeId}</strong>
-          <span>{active.score}/10</span>
-        </div>
-        <p>{active.note}</p>
+        {Object.entries(dimensions).map(([key, dim]) => (
+          <div className="rate-dimension" key={key}>
+            <div className="rate-dimension-header">
+              <strong>{DIMENSION_LABELS[key] || key}</strong>
+              <span>{dim.score}/10</span>
+            </div>
+            <p>{dim.note}</p>
+          </div>
+        ))}
       </div>
-    </div>
+    </details>
   );
 }

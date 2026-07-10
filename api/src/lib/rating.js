@@ -1,55 +1,130 @@
-const DIMENSION_KEYS = ["clarity", "context", "examples", "structure", "success_criteria"];
+const DIMENSION_KEYS = ["goal_clarity", "relevant_context", "constraints", "output_specification", "success_criteria"];
 
-const SCORE_FLOOR = 3;
+// Fixed weights, summing to 100. Applied in CODE, never by the model — the
+// model only ever outputs raw 1-10 scores per dimension. This keeps the
+// weighted-average math fully deterministic instead of asking the model to
+// do arithmetic every call, which is a real source of run-to-run drift.
+const DIMENSION_WEIGHTS = {
+  goal_clarity: 25,
+  relevant_context: 20,
+  constraints: 15,
+  output_specification: 20,
+  success_criteria: 20,
+};
+
+const SCORE_FLOOR = 3; // per-dimension floor, out of 10 — unchanged from v2
+const GOAL_CLARITY_GATE_THRESHOLD = 4; // if goal_clarity <= this, cap overall
+const GOAL_CLARITY_GATE_CAP = 50; // ...at this value (out of 100)
+
+// Bump whenever RUBRIC_SYSTEM_PROMPT's scoring logic changes materially — a
+// rubric change is a measurement change, and past ratings are only
+// comparable to new ones if you know which rubric version produced each.
+const RUBRIC_VERSION = "2026-07-v3";
 
 const RUBRIC_SYSTEM_PROMPT = `You are PromptCoach, an expert at evaluating and improving prompts written for AI models.
 
-Rate prompts on 5 dimensions, each scored 1-10:
-- clarity: is the ask unambiguous?
-- context: does it give necessary background?
-- examples: does it include few-shot examples where useful? An example is a demonstrated input→output pair showing what a correct response looks like — NOT the task input itself (the text/data the prompt asks to be classified, summarized, transformed, etc.). A prompt that only contains the item to be processed has zero examples, no matter how well-specified that item is.
-- structure: is it organized (sections, headings, minimal necessary structure)?
-- success_criteria: does it define what a good output looks like?
+Score prompts on 5 core dimensions, each 1-10. These combine into a weighted 100-point score computed separately — you do not need to compute or state the overall score yourself, only the 5 raw dimension scores.
 
-Rules:
+- goal_clarity: is the requested task unambiguous?
+- relevant_context: is the necessary background/input present?
+- constraints: are requirements, boundaries, and decision rules for handling edge cases defined?
+- output_specification: is the desired response FORM clear (format, structure, shape of the answer)?
+- success_criteria: can a successful/correct answer be recognized (independent of its form)?
+
+Output Specification vs. Success Criteria — these are easy to blur on simple tasks, do not let one absorb the other: Output Specification owns the SHAPE of the response (e.g. "return one word," "respond in JSON matching this schema," "under 100 words"). Success Criteria owns whether the CONTENT can be judged correct or successful (e.g. is there a way to verify the classification was right, does the output actually solve the stated problem). A prompt can have a perfectly specified format and still have no way to verify correctness, or vice versa — score them independently, don't let a strong one on paper cover for a weak one.
+
+Separately, score 2 modifiers. These are NOT part of the weighted 100-point score — they are shown to the user as independent, non-numeric signals:
+- structure: categorical, one of: well_organized, adequate, needs_improvement, not_applicable
+- examples: categorical, one of: useful, unnecessary, missing, misleading
+
+Flow rules:
 - First round (no clarification yet given): if the prompt has genuinely zero usable context or intent, ask ONE clarifying question with 2-4 multiple-choice options instead of rating. Otherwise provide a rating. insufficient_context is not a valid choice on the first round — if the prompt is too vague to rate, ask the clarifying question instead.
 - Second round (a clarifying question and answer are given below): you may no longer ask a clarifying question. If the prompt plus the clarification still has ZERO usable context, use insufficient_context. Otherwise provide a rating.
 - Never invent context the user didn't give you. A short prompt with a clear, specific ask is still ratable — "ask a clarifying question" is only for prompts too vague to rate at all.
-- When providing a rating, also provide a concise rewritten version of the prompt that fixes its weaknesses. rewritten_prompt must be plain prompt text only — no surrounding braces, quotes, or JSON formatting, even though it's a JSON string value.
-- If your rewritten_prompt adds something to address a low Examples score, it must add a genuinely distinct input→output pair — a different case than the one the prompt processes, showing input alongside its correct output. Labeling or annotating the existing task input (e.g. adding "Expected output: X" under the same item being processed) does NOT count as adding an example and does not fix the gap you rated.
-- Be honest about weaknesses in the notes even though scores have a floor applied afterward.
+- When providing a rating, also provide a concise rewritten version of the prompt that fixes its weaknesses. rewritten_prompt must be plain prompt text only — no surrounding braces, quotes, or JSON formatting, even though it's a JSON string value. If it adds something to address a missing/misleading Examples modifier, it must add a genuinely distinct input→output pair — a different case than the one the prompt processes. Labeling or annotating the existing task input (e.g. "Expected output: X" under the same item being processed) does NOT count as adding an example.
 - The tool's fields are all present regardless of action, but only the ones relevant to your chosen action matter — set every other field to null.
 
-Scoring calibration (read carefully — these correct a known pattern where the written note describes a real flaw but the number doesn't reflect it):
-- Before assigning a numeric score for any dimension, re-read the note you're about to write for that dimension. If the note describes a flaw that would meaningfully change how well the output serves the user's actual goal — not a purely cosmetic nitpick — the score MUST be 6 or below, not 7-8. A score of 7-8 should only be used when the note describes minor polish opportunities, not structural or substantive gaps. If you find yourself writing a note that reads like a real problem but reaching for a 7, that mismatch means the score is wrong — lower it.
-- Exception to the rule above: when the prompt has already addressed the main version of a gap — it states a general rule AND demonstrates it with a matching example — remaining nuance (edge cases beyond the one already covered, or a missing numeric threshold where a qualitative rule is already given) should score 7-8, not 5-6. Reserve 5 and below for gaps where no rule or example addresses the issue at all. Test before scoring low: if you removed the one remaining nuance you're about to critique, would the prompt still function correctly for the given task? If yes, it's a minor deduction (7-8), not a major one.
-- If a clarifying question was required to determine the user's intent, the Clarity score for that submission is capped at 5/10, regardless of how clear the intent becomes after clarification. The score describes the prompt as originally submitted — do not let a successful clarification round raise it. The Clarity note must say explicitly that a clarifying round was needed; do not silently apply the cap without surfacing it in the written feedback.
-- Examples labeling check (this has been a recurring, confirmed error — check it explicitly every time before writing the Examples note): find the specific text in the prompt you are about to call "an example." Is it a worked input→output pair, distinct from the item the prompt is asking to be processed? Or is it just the task input itself (the text/data to classify, summarize, rewrite, etc.), possibly with an "expected output" label bolted onto it? The latter is NOT an example — it is the task input, and labeling it as one is a scoring error. If the prompt has no separate worked input→output pair, Examples has zero real examples and must score 3-5, regardless of how well-specified the task input is. Do not write a note claiming "a concrete example is provided" unless you can point to a distinct input→output pair that is not the item being processed.
-- Structure measures how easily a human or model can scan and parse the prompt — NOT whether good information is present somewhere in it (that's covered by Context/Examples/Success criteria). A prompt that contains all the right information inside one long run-on paragraph, with no sections, headings, or line breaks, should score LOW on Structure (3-5) even if every other dimension is strong. Reserve 8-10 for prompts with clear visual/logical separation between distinct parts (task, context, examples, format), whether via headings, numbered lists, or clearly separated paragraphs.`;
+Scoring process for the 5 core dimensions — do this for every one, every time:
+1. Write the specific evidence from the prompt that supports your assessment BEFORE committing to a number. Base the score strictly on that evidence — do not pick a score first and rationalize a note afterward. If no genuine evidence supports a claim, do not make that claim.
+2. Re-read the note you just wrote. If it describes a flaw that would meaningfully change how well the output serves the user's actual goal — not a purely cosmetic nitpick — the score MUST be 5 or below. A 7-8 should only be used when the note describes minor polish opportunities, not structural or substantive gaps. If a note reads like a real problem but you're reaching for a 7, the mismatch means the score is wrong — lower it.
+3. Exception: once a prompt has already addressed the CORE of a gap (states a general rule AND demonstrates it with a matching example), remaining minor nuance should NOT be scored as if the core gap still existed. Test: if you removed only the one remaining nuance you're about to critique, would the prompt still function correctly for the task? If yes, that's a 7-8 deduction, not 5-or-below.
 
+Dimension-specific rules:
+- goal_clarity: if a clarifying question was required to determine the user's intent, goal_clarity is capped at 5/10 for that submission, regardless of how clear intent becomes after clarification. The score describes the prompt as originally submitted — a successful clarification round does not raise it. The note must say explicitly that a clarifying round was needed.
+- constraints — explicit ambiguity check, required before scoring: first state, in the note, whether the SPECIFIC input given (not the task category in the abstract) contains two or more elements that could reasonably be classified or handled differently (e.g. conflicting sentiment, multiple valid interpretations of the same instruction). Name the specific conflicting elements if so. If the input is genuinely ambiguous this way and the prompt provides neither a decision rule nor a resolving example, constraints scores 5 or below — this is a direct consequence of the input being ambiguous, not a soft judgment call about how "meaningful" the gap feels. Do not let task simplicity elsewhere in the prompt soften this.
+- relevant_context vs. constraints: relevant_context owns whether necessary background/input DATA is present (e.g. is the text-to-process given, is the audience/purpose stated). constraints owns whether RULES for handling that data are defined, including edge-case decision rules. A prompt can supply all the right background data and still score low on constraints if it gives no rule for an ambiguous case within that data.
+
+Modifier-specific rules:
+- structure: use the "Structural facts" provided in the user message (line break count, headings, lists, word count) exactly as given — do not independently judge formatting by reading the prompt text yourself; you are unreliable at detecting whitespace this way. Use not_applicable for short, simple prompts where structure doesn't meaningfully matter (informed by the word count fact) — do not penalize a short prompt for lacking headings/lists it doesn't need. Use needs_improvement only for longer/complex prompts that are genuinely a wall of text per the structural facts.
+- examples — task input vs. few-shot example: distinguish the "task input" (the specific text/data the user wants processed right now) from a "few-shot example" (a demonstrated input→output pair placed elsewhere in the prompt, before the task input, to teach the model the pattern). The task input never counts as an example, no matter how illustrative it looks. Before writing a note claiming an example exists, name the specific distinct input→output pair — if you can't point to one, there are zero examples.
+- examples — categorical assessment: first classify whether this task type meaningfully benefits from demonstrated input→output pairs (ambiguous/subjective judgment calls, fuzzy category boundaries, precise structured formats, style/tone matching all benefit; simple self-contained unambiguous instructions do not). Then choose: "useful" if examples are present and genuinely help; "unnecessary" if none are present but the task doesn't need them (say so plainly in the note — do not treat this as a gap); "missing" if the task would benefit from examples and none are given; "misleading" if an example is present but contradicts the stated instructions or would teach the wrong pattern.`;
+
+// note is declared before score so the model writes its evidence for a
+// dimension before committing to that dimension's number — property order
+// in a strict tool schema is the order the model fills them in.
 const dimensionSchema = {
   type: "object",
   properties: {
-    score: { type: "integer" },
     note: { type: "string" },
+    score: { type: "integer" },
   },
-  required: ["score", "note"],
+  required: ["note", "score"],
   additionalProperties: false,
 };
 
+// Same note-before-label ordering trick applied to the categorical modifiers.
+const structureModifierSchema = {
+  type: "object",
+  properties: {
+    note: { type: "string" },
+    applicability: {
+      type: "string",
+      enum: ["well_organized", "adequate", "needs_improvement", "not_applicable"],
+    },
+  },
+  required: ["note", "applicability"],
+  additionalProperties: false,
+};
+
+const examplesModifierSchema = {
+  type: "object",
+  properties: {
+    note: { type: "string" },
+    applicability: {
+      type: "string",
+      enum: ["useful", "unnecessary", "missing", "misleading"],
+    },
+  },
+  required: ["note", "applicability"],
+  additionalProperties: false,
+};
+
+// dimensions/modifiers declared before verdict so all scores and modifier
+// labels exist before the model writes its summary — same
+// generation-order-matches-dependency-order reasoning as dimensionSchema.
+// Note there is NO "overall" field here — overall is computed in code by
+// computeOverallScore(), never by the model.
 const ratingSchema = {
   type: "object",
   properties: {
-    overall: { type: "integer" },
-    verdict: { type: "string" },
     dimensions: {
       type: "object",
       properties: Object.fromEntries(DIMENSION_KEYS.map((k) => [k, dimensionSchema])),
       required: DIMENSION_KEYS,
       additionalProperties: false,
     },
+    modifiers: {
+      type: "object",
+      properties: {
+        structure: structureModifierSchema,
+        examples: examplesModifierSchema,
+      },
+      required: ["structure", "examples"],
+      additionalProperties: false,
+    },
+    verdict: { type: "string" },
   },
-  required: ["overall", "verdict", "dimensions"],
+  required: ["dimensions", "modifiers", "verdict"],
   additionalProperties: false,
 };
 
@@ -119,22 +194,44 @@ const reviseTool = {
   },
 };
 
-function enforceScoreFloor(rating) {
-  if (!rating) return rating;
-  rating.overall = Math.max(rating.overall, SCORE_FLOOR);
+// Deterministic, computable-in-code structural signals — handed to the model
+// as facts rather than left to its (unreliable) reading of raw whitespace.
+function computeStructuralFacts(prompt) {
+  const lineBreakCount = (prompt.match(/\n/g) || []).length;
+  const hasHeadings = /^#{1,6}\s/m.test(prompt);
+  const hasBulletList = /^[-*]\s/m.test(prompt);
+  const hasNumberedList = /^\d+\.\s/m.test(prompt);
+  const wordCount = prompt.trim().split(/\s+/).filter(Boolean).length;
+  return { lineBreakCount, hasHeadings, hasBulletList, hasNumberedList, wordCount };
+}
+
+// Enforces the per-dimension floor, then computes the weighted 100-point
+// overall score in code — the model never sees or produces this number.
+// Also applies the goal_clarity gate: an unclear task poisons everything
+// downstream regardless of how the weighted math would otherwise land.
+function computeOverallScore(dimensions) {
+  let total = 0;
   for (const key of DIMENSION_KEYS) {
-    if (rating.dimensions?.[key]) {
-      rating.dimensions[key].score = Math.max(rating.dimensions[key].score, SCORE_FLOOR);
-    }
+    const flooredScore = Math.max(dimensions[key].score, SCORE_FLOOR);
+    dimensions[key].score = flooredScore; // keep displayed sub-score consistent with what was used
+    total += (flooredScore / 10) * DIMENSION_WEIGHTS[key];
   }
-  return rating;
+
+  let overall = Math.round(total);
+  if (dimensions.goal_clarity.score <= GOAL_CLARITY_GATE_THRESHOLD) {
+    overall = Math.min(overall, GOAL_CLARITY_GATE_CAP);
+  }
+  return overall;
 }
 
 module.exports = {
   DIMENSION_KEYS,
+  DIMENSION_WEIGHTS,
+  RUBRIC_VERSION,
   RUBRIC_SYSTEM_PROMPT,
   buildRateTool,
-  enforceScoreFloor,
+  computeStructuralFacts,
+  computeOverallScore,
   REVISE_SYSTEM_PROMPT,
   reviseTool,
 };
