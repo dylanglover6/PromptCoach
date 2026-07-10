@@ -1,0 +1,132 @@
+[
+  {
+    "id": "task_01_data_extraction",
+    "category": "data_extraction",
+    "title": "Structured contact extraction",
+    "scenario": "Write a prompt that extracts structured contact information (name, email, phone) from a block of unstructured text and returns it as JSON.",
+    "criteria": [
+      "specifies the exact JSON schema or field names expected",
+      "specifies handling for missing fields (e.g. null vs. omit)",
+      "gives at least one example of input to output"
+    ],
+    "sequence": 1,
+    "isCapstone": false
+  },
+  {
+    "id": "task_02_creative_writing",
+    "category": "creative_writing",
+    "title": "Tone-controlled short story",
+    "scenario": "Write a prompt asking for a short story (under 300 words) about a robot discovering emotions, written in a specific, named tone.",
+    "criteria": [
+      "names a specific tone or voice (e.g. whimsical, melancholic)",
+      "gives a length constraint",
+      "specifies point of view or narrative style"
+    ],
+    "sequence": 2,
+    "isCapstone": false
+  },
+  {
+    "id": "task_03_code_generation",
+    "category": "code_generation",
+    "title": "Function with edge cases",
+    "scenario": "Write a prompt asking for a function that validates email addresses, ensuring the response covers common edge cases.",
+    "criteria": [
+      "specifies the programming language",
+      "names at least two specific edge cases to handle (e.g. missing @, empty string)",
+      "specifies what the function should return (boolean, error message, etc.)"
+    ],
+    "sequence": 3,
+    "isCapstone": false
+  },
+  {
+    "id": "task_04_summarization",
+    "category": "summarization",
+    "title": "Executive summary",
+    "scenario": "Write a prompt to summarize a technical article for a non-technical executive audience.",
+    "criteria": [
+      "target audience named",
+      "length or format constraint given",
+      "priorities specified (conclusions vs. methodology)"
+    ],
+    "sequence": 4,
+    "isCapstone": false
+  },
+  {
+    "id": "task_05_classification",
+    "category": "classification",
+    "title": "Support ticket triage",
+    "scenario": "Write a prompt that classifies incoming customer support tickets into categories like Billing, Technical, or General, ensuring consistent category assignment.",
+    "criteria": [
+      "lists the exact allowed categories",
+      "gives a rule for tickets that could fit multiple categories",
+      "specifies the output format (single label vs. list)"
+    ],
+    "sequence": 5,
+    "isCapstone": false
+  },
+  {
+    "id": "task_06_instructional",
+    "category": "instructional",
+    "title": "Step-by-step how-to",
+    "scenario": "Write a prompt asking for step-by-step instructions for setting up a home Wi-Fi router, suitable for someone with no technical background.",
+    "criteria": [
+      "specifies a numbered or step-based output structure",
+      "names the audience's skill level",
+      "specifies whether troubleshooting tips should be included"
+    ],
+    "sequence": 6,
+    "isCapstone": false
+  },
+  {
+    "id": "task_07_comparative_analysis",
+    "category": "comparative_analysis",
+    "title": "Unbiased product comparison",
+    "scenario": "Write a prompt asking for a comparison between two competing software products, structured to avoid favoring either one.",
+    "criteria": [
+      "names the specific two products to compare",
+      "specifies the comparison criteria or dimensions to use",
+      "explicitly instructs neutrality or asks for pros/cons of each"
+    ],
+    "sequence": 7,
+    "isCapstone": false
+  },
+  {
+    "id": "task_08_agentic",
+    "category": "agentic",
+    "title": "Multi-step research task",
+    "scenario": "Write a prompt asking an AI agent to research a topic across multiple steps (search, synthesize, cite sources) and produce a cited summary.",
+    "criteria": [
+      "specifies that sources must be cited",
+      "defines what counts as a successful/complete answer",
+      "breaks down or implies the multi-step process expected"
+    ],
+    "sequence": 8,
+    "isCapstone": false
+  },
+  {
+    "id": "task_09_constrained_rewriting",
+    "category": "constrained_rewriting",
+    "title": "Formal-to-casual tone rewrite",
+    "scenario": "Write a prompt that rewrites a formal business email into a casual, friendly tone while preserving all factual content.",
+    "criteria": [
+      "specifies which tone to convert to",
+      "explicitly requires preserving factual content or meaning",
+      "gives a format constraint (e.g. keep it an email, similar length)"
+    ],
+    "sequence": 9,
+    "isCapstone": false
+  },
+  {
+    "id": "task_10_ambiguous_trap",
+    "category": "ambiguous_trap",
+    "title": "The vague request",
+    "scenario": "Write a prompt asking an AI to \"make my writing better.\"",
+    "criteria": [
+      "adds specificity the original scenario lacks (e.g. names what \"better\" means: clarity, conciseness, tone)",
+      "defines what input text will be provided and in what form",
+      "specifies what should be preserved vs. changed"
+    ],
+    "sequence": 10,
+    "isCapstone": true
+  }
+]

@@ -189,6 +189,49 @@ function buildRateTool(round) {
   };
 }
 
+// Practice mode grades a prompt against a specific, already-known task instead
+// of evaluating a prompt cold — so the clarifying-question/insufficient-context
+// branches from the main rater don't apply at all (there's nothing to clarify;
+// the task is fixed). This is a strictly simpler tool than buildRateTool: no
+// "action" discriminated union, no nullable fields — always exactly rating +
+// rewritten_prompt, reusing the same ratingSchema (and therefore the same
+// dimensions/modifiers/gating) the main rater uses.
+function buildPracticeTool() {
+  return {
+    name: "submit_practice_evaluation",
+    description: "Submit the evaluation of the user's prompt against the given task.",
+    strict: true,
+    input_schema: {
+      type: "object",
+      properties: {
+        rating: ratingSchema,
+        rewritten_prompt: { type: "string" },
+      },
+      required: ["rating", "rewritten_prompt"],
+      additionalProperties: false,
+    },
+  };
+}
+
+// Folds the task's scenario + specific criteria into the same base rubric,
+// rather than building a separate criteria-checklist scorer — a missing
+// criterion is scored as a real gap in whichever dimension it naturally
+// belongs to (constraints, relevant_context, success_criteria, etc.),
+// using the exact same anchoring rules already in RUBRIC_SYSTEM_PROMPT.
+function buildPracticeSystemPrompt(scenario, criteria) {
+  const criteriaList = criteria.map((c) => `- ${c}`).join("\n");
+  return `${RUBRIC_SYSTEM_PROMPT}
+
+Practice mode: the user is responding to a specific task, not writing a prompt from scratch.
+
+The task the user was given: "${scenario}"
+
+A strong response to this task should address the following, in whichever dimension each naturally belongs to (do not treat this as a separate checklist — score it through the existing 5 dimensions and 2 modifiers exactly as defined above):
+${criteriaList}
+
+A prompt that ignores one of these is a real gap in the corresponding dimension — score it using the same anchoring rules as above, not more leniently just because the task itself is already known. Since the task is fully specified here, always call the tool with a full rating — never ask a clarifying question and never call it insufficient, even if the user's submission is weak, off-topic, or just repeats the task scenario back verbatim without adding anything.`;
+}
+
 const REVISE_SYSTEM_PROMPT = `You are PromptCoach, helping a user revise a rewritten prompt that didn't fit their needs.
 You will be given the user's original prompt, a rewritten version of it, and the user's feedback on why the rewrite doesn't work for them.
 Produce a new rewritten prompt that addresses the feedback while still preserving the original prompt's underlying intent. rewritten_prompt must be plain prompt text only — no surrounding braces, quotes, or JSON formatting, even though it's a JSON string value.`;
@@ -268,6 +311,8 @@ module.exports = {
   RUBRIC_VERSION,
   RUBRIC_SYSTEM_PROMPT,
   buildRateTool,
+  buildPracticeTool,
+  buildPracticeSystemPrompt,
   computeStructuralFacts,
   computeOverallScore,
   enforceStructureModifier,
