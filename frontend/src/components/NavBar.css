@@ -1,10 +1,24 @@
 .nav-bar {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 20px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
   max-width: 720px;
   margin: 0 auto;
+}
+
+.nav-bar-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-bar-auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
 }
 
 .nav-bar a {
@@ -16,4 +30,8 @@
 .nav-bar a.active {
   color: var(--text-h);
   text-decoration: underline;
+}
+
+.nav-bar-user {
+  color: var(--text-h);
 }
