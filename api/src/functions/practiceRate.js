@@ -9,8 +9,10 @@ const {
   enforceStructureModifier,
 } = require("../lib/rating");
 const { getTaskById } = require("../lib/tasks");
+const { checkRequestAllowed, recordSpend } = require("../lib/costControls");
 
 const MODEL = process.env.RATER_MODEL || "claude-haiku-4-5";
+const MAX_PROMPT_LENGTH = Number(process.env.MAX_PROMPT_LENGTH) || 4000;
 
 app.http("practiceRate", {
   methods: ["POST"],
@@ -31,10 +33,18 @@ app.http("practiceRate", {
     if (typeof prompt !== "string" || prompt.trim().length === 0) {
       return { status: 400, jsonBody: { error: '"prompt" is required and must be a non-empty string.' } };
     }
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      return { status: 413, jsonBody: { error: `"prompt" must be ${MAX_PROMPT_LENGTH} characters or fewer.` } };
+    }
 
     const task = getTaskById(taskId);
     if (!task) {
       return { status: 404, jsonBody: { error: `No task found with id "${taskId}".` } };
+    }
+
+    const rateCheck = await checkRequestAllowed(request);
+    if (!rateCheck.allowed) {
+      return { status: rateCheck.status, jsonBody: { error: rateCheck.error } };
     }
 
     const structuralFacts = computeStructuralFacts(prompt);
@@ -58,6 +68,8 @@ app.http("practiceRate", {
     } catch (err) {
       return { status: 500, jsonBody: { error: "Failed to evaluate prompt.", detail: err.message } };
     }
+
+    await recordSpend(response.usage);
 
     const toolUse = response.content.find((block) => block.type === "tool_use");
     if (!toolUse) {

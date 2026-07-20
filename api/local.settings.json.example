@@ -4,6 +4,9 @@
     "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "ANTHROPIC_API_KEY": "sk-ant-replace-me",
-    "COSMOS_DB_CONNECTION_STRING": ""
+    "TABLES_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "RATE_LIMIT_PER_IP_PER_HOUR": "20",
+    "DAILY_SPEND_CEILING_USD": "5",
+    "MAX_PROMPT_LENGTH": "4000"
   }
 }

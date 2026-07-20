@@ -1,8 +1,10 @@
 const { app } = require("@azure/functions");
 const Anthropic = require("@anthropic-ai/sdk");
 const { RUBRIC_VERSION, RUBRIC_SYSTEM_PROMPT, buildRateTool, computeStructuralFacts, computeOverallScore, enforceStructureModifier } = require("../lib/rating");
+const { checkRequestAllowed, recordSpend } = require("../lib/costControls");
 
 const MODEL = process.env.RATER_MODEL || "claude-haiku-4-5";
+const MAX_PROMPT_LENGTH = Number(process.env.MAX_PROMPT_LENGTH) || 4000;
 
 app.http("rate", {
   methods: ["POST"],
@@ -20,8 +22,19 @@ app.http("rate", {
     if (typeof prompt !== "string" || prompt.trim().length === 0) {
       return { status: 400, jsonBody: { error: "\"prompt\" is required and must be a non-empty string." } };
     }
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      return { status: 413, jsonBody: { error: `"prompt" must be ${MAX_PROMPT_LENGTH} characters or fewer.` } };
+    }
+
+    const rateCheck = await checkRequestAllowed(request);
+    if (!rateCheck.allowed) {
+      return { status: rateCheck.status, jsonBody: { error: rateCheck.error } };
+    }
 
     const clarification = body?.clarification;
+    if (clarification && typeof clarification.answer === "string" && clarification.answer.length > MAX_PROMPT_LENGTH) {
+      return { status: 413, jsonBody: { error: `"clarification.answer" must be ${MAX_PROMPT_LENGTH} characters or fewer.` } };
+    }
     const round = clarification ? 2 : 1;
 
     const structuralFacts = computeStructuralFacts(prompt);
@@ -47,6 +60,8 @@ app.http("rate", {
     } catch (err) {
       return { status: 500, jsonBody: { error: "Failed to evaluate prompt.", detail: err.message } };
     }
+
+    await recordSpend(response.usage);
 
     const toolUse = response.content.find((block) => block.type === "tool_use");
     if (!toolUse) {

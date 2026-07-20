@@ -4,13 +4,16 @@
   "private": true,
   "main": "src/functions/*.js",
   "scripts": {
-    "start": "func start"
+    "start": "func start",
+    "azurite": "azurite --silent --location .azurite --debug .azurite/debug.log"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
+    "@azure/data-tables": "^13.3.1",
     "@azure/functions": "^4.5.1"
   },
   "devDependencies": {
-    "azure-functions-core-tools": "^4.0.6929"
+    "azure-functions-core-tools": "^4.0.6929",
+    "azurite": "^3.34.0"
   }
 }
