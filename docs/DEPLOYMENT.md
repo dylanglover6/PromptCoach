@@ -1,15 +1,13 @@
 # Going Live — Deployment Checklist
 
-For the custom domain, launch order relative to the other two `dylanglover.com`
-projects, and the hard gate on sharing the URL, `docs/unified-deployment-plan.md` is
-the source of truth — this doc covers the PromptCoach-specific runbook underneath it.
-
-Current status (2026-07-17): steps 1-5 of `promptcoach-mvp-spec-v2.md` are built
-(scaffold, Rate my prompt, Learn, Practice mode, GitHub auth wiring). Step 6 (Cosmos DB)
-is intentionally out of scope. Step 7 (rate limiting / cost controls) is now built —
-input-length cap, per-IP rate limiting, and a daily spend ceiling, all backed by Azure
-Table Storage (Azurite locally). See the checklist below for what's left before going
-fully public.
+PromptCoach is deployed as an Azure Static Web App with a managed Functions API. It
+ships Rate my prompt, a Learn section, Practice mode, and GitHub-based login, with an
+input-length cap, per-IP rate limiting, and a daily spend ceiling protecting the
+Anthropic-calling endpoints (all Azure Table Storage-backed, Azurite locally). This
+checklist covers what's left to take it from "builds and runs locally" to "live and
+safe to share publicly." PromptCoach also shares `dylanglover.com` infrastructure
+with a couple of other personal projects, which is why the custom domain below is
+fixed rather than left open.
 
 ## Before deploying: rate limiting (done — provision Storage before going live)
 
@@ -66,9 +64,8 @@ original spec and isn't needed — Cosmos DB is out of scope (see project memory
 ## 3. CORS is already locked down
 
 `frontend/public/staticwebapp.config.json` has a `globalHeaders` block restricting
-`Access-Control-Allow-Origin` to `https://promptcoach.dylanglover.com` — the domain
-is fixed by `docs/unified-deployment-plan.md`, so this no longer needs a post-deploy
-placeholder edit. This doesn't affect the app's own frontend calling its own API
+`Access-Control-Allow-Origin` to `https://promptcoach.dylanglover.com` — no post-deploy
+placeholder edit needed. This doesn't affect the app's own frontend calling its own API
 (same-origin calls never trigger CORS checks); it only stops other sites from
 embedding your endpoint. If the domain ever changes, update this value and redeploy.
 
@@ -82,11 +79,11 @@ through a real GitHub OAuth consent screen, not a fake picker.
 
 ## 5. Custom domain
 
-`promptcoach.dylanglover.com`, per `docs/unified-deployment-plan.md`'s DNS table.
-Azure Portal → your Static Web App → Custom domains → Add; the registrar gets a
-CNAME record pointing `promptcoach` at the app's `*.azurestaticapps.net` hostname
-(plus a TXT validation record if Azure prompts for one). The CORS origin (step 3)
-is already set to this domain, so no follow-up edit needed once it's live.
+`promptcoach.dylanglover.com`. Azure Portal → your Static Web App → Custom domains →
+Add; the registrar gets a CNAME record pointing `promptcoach` at the app's
+`*.azurestaticapps.net` hostname (plus a TXT validation record if Azure prompts for
+one). The CORS origin (step 3) is already set to this domain, so no follow-up edit
+needed once it's live.
 
 ## 6. Post-deploy smoke test checklist
 

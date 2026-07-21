@@ -1,10 +1,31 @@
+# OS cruft
+.DS_Store
+
+# Build output / dependencies
 node_modules/
 dist/
-.DS_Store
+
+# Local secrets & environment files (never commit real API keys/connection strings)
 api/local.settings.json
-api/.azurite/
 .env
 .env.*
+
+# Editor config (keep only the shared extensions recommendation)
 .vscode/*
 !.vscode/extensions.json
-.claude/settings.local.json
+
+# Local dev services (Azurite table/queue/blob emulator storage)
+api/.azurite/
+
+# Claude Code local config, lockfiles, and task state — machine-specific, not for the repo
+.claude/
+
+# Internal specs, rubric calibration notes, and Claude-Code task briefs — working
+# docs from active development, superseded by the current code + docs/DEPLOYMENT.md
+/promptcoach-mvp-spec-v2.md
+/promptcoach-rubric-fixes-v2.md
+/promptcoach-v3-rollout-steps.md
+/docs/promptcoach-rubric-v3-changelog.md
+
+# Cross-repo infrastructure plan with real domain/VM details — local only
+/docs/unified-deployment-plan.md
