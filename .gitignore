@@ -29,3 +29,6 @@ api/.azurite/
 
 # Cross-repo infrastructure plan with real domain/VM details — local only
 /docs/unified-deployment-plan.md
+
+# Customer-facing portfolio write-up — kept local only, not for the public repo
+/docs/project-showcase.md
