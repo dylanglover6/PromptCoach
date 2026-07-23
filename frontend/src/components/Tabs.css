@@ -1,23 +1,30 @@
 .tabs-strip {
   display: flex;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px dashed var(--border-soft);
   gap: 4px;
 }
 
 .tabs-tab {
   font: inherit;
+  font-family: var(--hand-alt);
+  font-size: 17px;
   cursor: pointer;
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: 3px solid transparent;
   color: var(--text);
   padding: 8px 12px;
-  margin-bottom: -1px;
+  margin-bottom: -2px;
+  transition: color 0.15s ease;
+}
+
+.tabs-tab:hover {
+  color: var(--text-h);
 }
 
 .tabs-tab.active {
   color: var(--text-h);
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--chalk-yellow);
   font-weight: 600;
 }
 

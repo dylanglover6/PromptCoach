@@ -1,33 +1,45 @@
 .info-button-wrap {
   position: relative;
   display: inline-block;
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 .info-button {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: 1px solid var(--accent-border);
+  border: 2px solid var(--accent-border);
   background: var(--accent-bg);
   color: var(--text-h);
-  font-style: italic;
-  font-size: 13px;
+  font-family: var(--hand);
+  font-style: normal;
+  font-size: 15px;
   line-height: 1;
   cursor: pointer;
   padding: 0;
+  transition: box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.info-button:hover {
+  background: rgba(232, 217, 160, 0.24);
+  box-shadow: 0 0 0 3px rgba(232, 217, 160, 0.14);
+}
+
+.info-button:focus-visible {
+  outline: 2px solid var(--chalk-blue);
+  outline-offset: 2px;
 }
 
 .info-popover {
   position: absolute;
-  top: 28px;
+  top: 32px;
   left: 0;
   z-index: 10;
   width: 280px;
   max-width: 80vw;
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--board-1);
+  border: 2px solid var(--border);
+  border-radius: 10px 14px 10px 14px;
   box-shadow: var(--shadow);
   padding: 14px 16px;
   text-align: left;
@@ -35,6 +47,10 @@
 
 .info-popover p {
   margin: 0;
-  font-size: 15px;
-  line-height: 145%;
+  font: 15px/145% var(--sans);
+  color: var(--text);
+}
+
+.info-popover a {
+  color: var(--chalk-blue);
 }

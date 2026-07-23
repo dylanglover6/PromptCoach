@@ -135,7 +135,10 @@ export default function RatePrompt() {
       {phase === "rating" && result && (
         <div className="rate-result">
           <div className="rate-overall">
-            <span className="rate-score">{result.rating.overall}/100</span>
+            <span className="rate-score">
+              <span className="rate-score-value">{result.rating.overall}</span>
+              <span className="rate-score-max">/100</span>
+            </span>
             <span className="rate-verdict">{result.rating.verdict}</span>
           </div>
           <DimensionsPanel dimensions={result.rating.dimensions} />

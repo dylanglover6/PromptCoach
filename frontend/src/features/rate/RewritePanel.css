@@ -10,12 +10,20 @@
 
 .copy-button {
   font: inherit;
+  font-family: var(--hand-alt);
+  font-size: 15px;
   cursor: pointer;
-  border-radius: 8px;
-  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  border: 2px solid var(--accent-border);
   background: var(--accent-bg);
   color: var(--text-h);
-  padding: 6px 12px;
+  padding: 6px 14px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.copy-button:hover {
+  background: rgba(232, 217, 160, 0.24);
+  box-shadow: 0 0 0 3px rgba(232, 217, 160, 0.12);
 }
 
 .rewrite-side-by-side {
@@ -29,9 +37,10 @@
 }
 
 .rewrite-side-by-side h3 {
-  font-size: 15px;
+  font-family: var(--hand-alt);
+  font-size: 16px;
   margin: 0 0 6px;
-  color: var(--text-h);
+  color: var(--chalk-blue);
 }
 
 .rewrite-panel pre {
@@ -40,8 +49,8 @@
   font-family: var(--mono);
   font-size: 15px;
   background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
   padding: 14px;
   color: var(--text-h);
   margin: 0;
@@ -49,13 +58,21 @@
 
 .feedback-toggle {
   font: inherit;
+  font-family: var(--hand-alt);
+  font-size: 16px;
   cursor: pointer;
   background: none;
   border: none;
-  color: var(--accent);
+  color: var(--chalk-pink);
   padding: 4px 0;
   text-align: left;
   text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 3px;
+}
+
+.feedback-toggle:hover {
+  color: var(--text-h);
 }
 
 .feedback-form {
@@ -67,13 +84,17 @@
 .feedback-form textarea {
   width: 100%;
   box-sizing: border-box;
-  font: inherit;
+  font: 15px/1.5 var(--sans);
   color: var(--text-h);
   background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
   padding: 10px 12px;
   resize: vertical;
+}
+
+.feedback-form textarea::placeholder {
+  color: var(--chalk-faint);
 }
 
 .feedback-form-actions {
@@ -83,12 +104,20 @@
 
 .feedback-form-actions button {
   font: inherit;
+  font-family: var(--hand-alt);
+  font-size: 16px;
   cursor: pointer;
-  border-radius: 8px;
-  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  border: 2px solid var(--accent-border);
   background: var(--accent-bg);
   color: var(--text-h);
-  padding: 8px 14px;
+  padding: 8px 16px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.feedback-form-actions button:hover:not(:disabled) {
+  background: rgba(232, 217, 160, 0.24);
+  box-shadow: 0 0 0 3px rgba(232, 217, 160, 0.12);
 }
 
 .feedback-form-actions button:disabled {

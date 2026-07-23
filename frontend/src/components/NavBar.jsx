@@ -7,6 +7,12 @@ export default function NavBar() {
 
   return (
     <nav className="nav-bar">
+      <div className="nav-bar-brand">
+        <div className="app-icon-slot nav-bar-icon" aria-hidden="true">
+          icon
+        </div>
+        <span className="nav-bar-title">Prompt Coach</span>
+      </div>
       <div className="nav-bar-links">
         <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>
           Rate my prompt
