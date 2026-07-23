@@ -1,0 +1,19 @@
+.app-footer {
+  margin-top: auto;
+  padding: 20px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--chalk-faint);
+  border-top: 2px dashed var(--border-soft);
+}
+
+.app-footer a {
+  color: var(--chalk-faint);
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 3px;
+}
+
+.app-footer a:hover {
+  color: var(--text-h);
+}

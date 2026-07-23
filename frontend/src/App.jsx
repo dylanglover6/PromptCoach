@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
+import Footer from "./components/Footer";
 import SplashScreen, { hasSeenSplash } from "./components/SplashScreen";
 import RatePrompt from "./features/rate/RatePrompt";
 import LearnPage from "./features/learn/LearnPage";
@@ -18,6 +19,7 @@ function App() {
         <Route path="/learn" element={<LearnPage />} />
         <Route path="/practice" element={<PracticePage />} />
       </Routes>
+      <Footer />
     </>
   );
 }
