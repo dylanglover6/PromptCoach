@@ -1,7 +1,7 @@
 const { getTableClient } = require("./tableStorage");
 
-const RATE_LIMIT_PER_IP_PER_HOUR = Number(process.env.RATE_LIMIT_PER_IP_PER_HOUR) || 20;
-const DAILY_SPEND_CEILING_USD = Number(process.env.DAILY_SPEND_CEILING_USD) || 5;
+const RATE_LIMIT_PER_IP_PER_HOUR = Number(process.env.RATE_LIMIT_PER_IP_PER_HOUR) || 15;
+const DAILY_SPEND_CEILING_USD = Number(process.env.DAILY_SPEND_CEILING_USD) || 2;
 const WINDOW_MS = 60 * 60 * 1000;
 const MAX_ETAG_RETRIES = 5;
 

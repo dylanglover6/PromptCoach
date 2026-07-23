@@ -18,8 +18,8 @@ feature down). At minimum, before sharing the live link with anyone:
 
 - [x] Add the input-length cap (`MAX_PROMPT_LENGTH`, default 4000 characters — 413 if
       exceeded)
-- [x] Finish per-IP rate limiting (`RATE_LIMIT_PER_IP_PER_HOUR`, default 20/hour — 429
-      if exceeded) and the daily spend ceiling (`DAILY_SPEND_CEILING_USD`, default $5 —
+- [x] Finish per-IP rate limiting (`RATE_LIMIT_PER_IP_PER_HOUR`, default 15/hour — 429
+      if exceeded) and the daily spend ceiling (`DAILY_SPEND_CEILING_USD`, default $2 —
       503 if exceeded), both Azure Table Storage-backed (`api/src/lib/costControls.js`,
       `api/src/lib/tableStorage.js`)
 - [ ] Provision the real Azure Storage Account (see step 1 below) and set
@@ -54,8 +54,8 @@ Functions app — `local.settings.json` is gitignored and never deploys:
 | `ANTHROPIC_API_KEY` | your real key | Never commit this. Rotate immediately if it's ever exposed. |
 | `RATER_MODEL` | *(optional)* | Defaults to `claude-haiku-4-5` if unset. |
 | `TABLES_CONNECTION_STRING` | Storage Account connection string | Required for rate limiting to be enforced live — without it the app still runs, but `costControls.js` fails open on every request (see below). Local dev uses `UseDevelopmentStorage=true` (Azurite) instead. |
-| `RATE_LIMIT_PER_IP_PER_HOUR` | *(optional)* | Defaults to `20` if unset. |
-| `DAILY_SPEND_CEILING_USD` | *(optional)* | Defaults to `5` if unset. |
+| `RATE_LIMIT_PER_IP_PER_HOUR` | *(optional)* | Defaults to `15` if unset. |
+| `DAILY_SPEND_CEILING_USD` | *(optional)* | Defaults to `2` if unset. |
 | `MAX_PROMPT_LENGTH` | *(optional)* | Defaults to `4000` if unset. |
 
 `COSMOS_DB_CONNECTION_STRING` in `local.settings.json.example` is a leftover from the
