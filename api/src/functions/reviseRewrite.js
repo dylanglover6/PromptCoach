@@ -49,7 +49,8 @@ app.http("reviseRewrite", {
         messages: [{ role: "user", content: userContent }],
       });
     } catch (err) {
-      return { status: 500, jsonBody: { error: "Failed to revise prompt.", detail: err.message } };
+      console.error("reviseRewrite: Anthropic call failed:", err.message);
+      return { status: 500, jsonBody: { error: "Failed to revise prompt." } };
     }
 
     await recordSpend(response.usage);

@@ -58,7 +58,8 @@ app.http("rate", {
         messages: [{ role: "user", content: userContent }],
       });
     } catch (err) {
-      return { status: 500, jsonBody: { error: "Failed to evaluate prompt.", detail: err.message } };
+      console.error("rate: Anthropic call failed:", err.message);
+      return { status: 500, jsonBody: { error: "Failed to evaluate prompt." } };
     }
 
     await recordSpend(response.usage);
